@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/72133185/deploy-an-express-server-that-uses-
 
 */
 //app.use('/',express.static('./public'));
-app.get('/', (req, res) => {
+app.get('/*', (req, res) => {
     res.sendFile('index.html', {root: path.join(__dirname, 'public')});
 });
 function newGuaxa(user){
