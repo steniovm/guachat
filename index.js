@@ -20,6 +20,7 @@ app.use('/',(req,res)=>{
     res.sendFile(join('index.html'));
 });
 */
+app.use('/',express.static('./public'));
 function newGuaxa(user){
     let result = true;
     guaxas.forEach(el=>{
