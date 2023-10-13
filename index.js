@@ -29,6 +29,9 @@ https://stackoverflow.com/questions/72133185/deploy-an-express-server-that-uses-
 app.get('/*', (req, res) => {
     res.sendFile('index.html', {root: path.join(__dirname, 'public')});
 });
+app.post('/*', (req, res) => {
+    res.sendFile('index.html', {root: path.join(__dirname, 'public')});
+});
 function newGuaxa(user){
     let result = true;
     guaxas.forEach(el=>{
