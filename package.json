@@ -1,0 +1,18 @@
+{
+  "name": "guachat",
+  "version": "1.0.0",
+  "description": "Chat para jogar Guaxinins e Gambiarras",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Stênio Vinicios de Medeiros",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}

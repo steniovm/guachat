@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat para jogar Guaxinis e Gambiarras</title>
+    <script src="https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js"></script>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+    <div id="modal" class="modal">
+        <form id="modalform">
+            <input type="text" id="inusername" name="username" placeholder="Digite seu nome" required/>
+            <label for="typeguaxa">
+                <input type="radio" id="typeguaxa" name="typeuser" value="Guaxa" checked/>
+                Guaxa
+            </label>
+            <label for="typeplayer">
+                <input type="radio" id="typeplayer" name="typeuser" value="Jogador"/>
+                Jogador
+            </label>
+            <div id="caracterinfos" class="hiddemdiv">
+                <label>Guaxa</label>
+                <input type="text" id="guaxaname" name="guaxaname" placeholder="Nome do seu guaxa"/>
+                <label>Personagem</label>
+                <input type="text" id="caractername" name="caractername" placeholder="Nome do seu personagem"/>
+                <label>Atributo: <strong id="attrlabel"></strong></label>
+                <input type="range" id="caracteratrib" name="caracteratrib" placeholder="Atributo do seu personagem" min="2" max="5"/>
+            </div>    
+            <button type="submit" id="submituser">Entrar</button>
+        </form>
+    </div>
+    <h2>Guaxinis & Gambiarras</h2>
+    <main id="mainusers">
+       <!-- <div class="showuserdiv divguaxa">
+            <span class="showusername"></span>
+            <label class="caracterinfo hiddemdiv">
+                <strong class="atrr"></strong>
+                <span class="caract"></span>
+            </label>
+            <video></video>
+        </div>
+        <div class="showuserdiv">
+            <span class="showusername"></span>
+            <label class="caracterinfo">
+                <strong class="atrr"></strong>
+                <span class="caract"></span>
+            </label>
+            <video></video>
+        </div>
+        <div class="showuserdiv">
+            <span class="showusername"></span>
+            <label class="caracterinfo">
+                <strong class="atrr"></strong>
+                <span class="caract"></span>
+            </label>
+            <video></video>
+        </div>
+        <div class="showuserdiv">
+            <span class="showusername"></span>
+            <label class="caracterinfo">
+                <strong class="atrr"></strong>
+                <span class="caract"></span>
+            </label>
+            <video></video>
+        </div>-->
+    </main>
+    <div>
+        <button class="mediabt" type="submit"><img src="microphone.svg" alt="Liga e desliga o aúdio"/></button>
+        <button class="mediabt" type="submit"><img src="camera.svg" alt="liga e desliga o video"/></button>
+    </div>
+    <form id="chat">
+        <input type="hidden" id="username" name="username"/>
+        <div id="messages" class="messages"></div>
+        <div>
+            <input type="text" id="message" name="message" placeholder="Digite sua mensagem"/>
+            <button type="submit" id="submitbt">Enviar</button>
+        </div>
+        <h3>Rolagem</h3>
+        <table>
+            <tr>
+                <td><strong>Teste oculto</strong></th>
+                <td><button class="dicebt" type="submit"><img src="OneDice.svg" alt="Um dado"/></button></td>
+                <td><button class="dicebt" type="submit"><img src="TwoDice.svg" alt="dois dados"/></button></td>
+                <td><button class="dicebt" type="submit"><img src="ThreeDice.svg" alt="Três dados"/></button></td>
+            </tr>
+            <tr>
+                <td><strong>Teste fisico</strong></th>
+                <td><button class="dicebt" type="submit"><img src="OneDice.svg" alt="Um dado"/></button></td>
+                <td><button class="dicebt" type="submit"><img src="TwoDice.svg" alt="dois dados"/></button></td>
+                <td><button class="dicebt" type="submit"><img src="ThreeDice.svg" alt="Três dados"/></button></td>
+            </tr>
+            <tr>
+                <td><strong>Teste intelectual</strong></th>
+                <td><button class="dicebt" type="submit"><img src="OneDice.svg" alt="Um dado"/></button></td>
+                <td><button class="dicebt" type="submit"><img src="TwoDice.svg" alt="dois dados"/></button></td>
+                <td><button class="dicebt" type="submit"><img src="ThreeDice.svg" alt="Três dados"/></button></td>
+            </tr>
+        </table>
+    </form>    
+</body>
+    <script type="text/javascript" src="script.js"></script>
+</html>
