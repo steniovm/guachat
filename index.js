@@ -15,11 +15,11 @@ app.use(express.static(path.join('public')));
 app.set('views',path.join('public'));
 app.engine('html',require('ejs').renderFile);
 app.set('view engine', 'html');
-
+/*
 app.use('/',(req,res)=>{
     res.sendFile(join('index.html'));
 });
-
+*/
 function newGuaxa(user){
     let result = true;
     guaxas.forEach(el=>{
