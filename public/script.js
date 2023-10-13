@@ -92,7 +92,7 @@ for(let i=0; i<dicebt.length; i++){
     });
 }
 
-let socket = io('./api');
+let socket = io();
 let author = '';
 let mess = '';
 
