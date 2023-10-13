@@ -32,6 +32,7 @@ let streamer;
 
 caracteratrib.value = Math.ceil(Math.random()*4)+1;
 attrlabel.innerHTML = caracteratrib.value;
+
 caracteratrib.addEventListener('change',()=>{
     attrlabel.innerHTML = caracteratrib.value;
 });
@@ -48,6 +49,18 @@ typeplayer.addEventListener('click',()=>{
     caractername.required = true;
     caracteratrib.required = true;
 });
+
+
+mediabt[0].addEventListener('click',()=>{
+    if (mediabt[0].classList.contains('borderoff'))stopmedias();
+    else starmedia();
+});
+
+mediabt[1].addEventListener('click',()=>{
+    if (mediabt[1].classList.contains('borderoff'))stopmedias();
+    else starmedia();
+});
+
 modalform.addEventListener('submit',(ev)=>{
     ev.preventDefault();
     let data = new FormData(modalform);
@@ -79,7 +92,7 @@ for(let i=0; i<dicebt.length; i++){
     });
 }
 
-let socket = io();
+let socket = io('./api');
 let author = '';
 let mess = '';
 
@@ -279,13 +292,3 @@ function addVideoStream(video, stream) {
     video.play();
   });
 }
-
-mediabt[0].addEventListener('click',()=>{
-    if (mediabt[0].classList.contains('borderoff'))stopmedias();
-    else starmedia();
-});
-
-mediabt[1].addEventListener('click',()=>{
-    if (mediabt[1].classList.contains('borderoff'))stopmedias();
-    else starmedia();
-});

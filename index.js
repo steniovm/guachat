@@ -19,8 +19,13 @@ app.set('view engine', 'html');
 app.use('/',(req,res)=>{
     res.sendFile(join('index.html'));
 });
+
+
+https://stackoverflow.com/questions/72133185/deploy-an-express-server-that-uses-express-static-to-serve-a-build-folder-to-ver
+
+
 */
-app.use('/',express.static('./public'));
+//app.use('/',express.static('./public'));
 function newGuaxa(user){
     let result = true;
     guaxas.forEach(el=>{
