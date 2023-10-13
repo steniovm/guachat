@@ -22,7 +22,7 @@ const dicebt = document.getElementsByClassName('dicebt');
 const mediabt = document.getElementsByClassName('mediabt');
 const mainusers = document.getElementById('mainusers');
 const showuserdiv = document.getElementsByClassName('showuserdiv');
-const PORT = 443;
+const PORT = location.protocol==='https:' ? 443: location.port ? location.port: 3000;
 const mediaopt = {video: true,audio: true};
 
 let datauser = {};
