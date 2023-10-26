@@ -25,7 +25,8 @@ const showuserdiv = document.getElementsByClassName('showuserdiv');
 const PORT = location.protocol==='https:' ? 443: location.port ? location.port: 3000;
 const mediaopt = {video: true,audio: true};
 
-let datauser = {};
+let userdata = {};
+let users = {};
 let usernumber = 0;
 let localstream;
 let streamer;
@@ -50,30 +51,48 @@ typeplayer.addEventListener('click',()=>{
     caracteratrib.required = true;
 });
 
-
+//evento de liga/desliga audio
 mediabt[0].addEventListener('click',()=>{
-    if (mediabt[0].classList.contains('borderoff'))stopmedias();
-    else starmedia();
+  const enabled = myVideoStream[usernumber].getAudioTracks()[0].enabled;//propriedade de audio ligado/desligado
+  if (enabled) {//se audio ligado
+    myVideoStream[usernumber].getAudioTracks()[0].enabled = false;//desliga audio
+    mediabt[0].classList.remove('borderoff');//altera botão
+  } else {//se audio desligado
+    myVideoStream[usernumber].getAudioTracks()[0].enabled = true;//liga audio
+    mediabt[0].classList.add('borderoff');//altera botão
+  }
+    //if (mediabt[0].classList.contains('borderoff'))stopmedias();
+    //else starmedia();
 });
-
+//evento de liga/desliga video
 mediabt[1].addEventListener('click',()=>{
-    if (mediabt[1].classList.contains('borderoff'))stopmedias();
-    else starmedia();
+  const enabled = myVideoStream[usernumber].getVideoTracks()[0].enabled;//propriedade de audio ligado/desligado
+  if (enabled) {//se audio ligado
+      myVideoStream[usernumber].getVideoTracks()[0].enabled = false;//desliga audio
+      mediabt[1].classList.remove('borderoff');//altera botão
+  } else {//se audio desligado
+      myVideoStream[usernumber].getVideoTracks()[0].enabled = true;//liga audio
+      mediabt[1].classList.add('borderoff');//altera botão
+  }
+    //if (mediabt[1].classList.contains('borderoff'))stopmedias();
+    //else starmedia();
 });
 
 modalform.addEventListener('submit',(ev)=>{
     ev.preventDefault();
     let data = new FormData(modalform);
-    datauser = Object.fromEntries(data);
+    userdata = Object.fromEntries(data);
     modal.classList.add('hiddemdiv');
     username.value = data.get('username');
     if (data.get('typeuser')==="Guaxa"){
         usernumber = 0;
+        userdata.guaxaname = userdata.username;
     }else if (data.get('typeuser')==="Jogador"){
         usernumber = 1;
     }
     renderMessage({author:"", message:"Bem Vindo ao Guaxinins e Gambiarras"});
-    socket.emit('sendUser', datauser);
+    socket.emit('sendUser', userdata);
+    console.log(userdata);
     //starmedia();
 });
 
@@ -84,9 +103,9 @@ for(let i=0; i<dicebt.length; i++){
     else if (i<6) {rolldices.typetest = 'f'}
     else {rolldices.typetest = 'i'}
     dicebt[i].addEventListener('click',()=>{
-        rolldices.user = datauser.username;
-        rolldices.room = datauser.guaxaname || datauser.username;
-        rolldices.attr = datauser.caracteratrib;
+        rolldices.user = userdata.username;
+        rolldices.room = userdata.guaxaname || userdata.username;
+        rolldices.attr = userdata.caracteratrib;
         socket.emit('rollDice', rolldices);
         console.log(rolldices);
     });
@@ -115,9 +134,10 @@ socket.on('receivedUser', (messag)=>{
     console.log(messag);
 });
 */
+
 socket.on('adduser', (datauser)=>{
     for(let i=0; i<showuserdiv.length; i++){
-        if (datauser.username == showuserdiv[i].querySelector('.showusername').innerHTML){
+        if (datauser.username === showuserdiv[i].querySelector('.showusername').innerHTML){
             showuserdiv[i].remove();
         }
     }
@@ -128,9 +148,13 @@ socket.on('adduser', (datauser)=>{
             datauser.caractername = "Guaxa";
             datauser.guaxaname = datauser.username;
             showdatauser(datauser);
+            users[datauser.sid]=datauser.playnamber;
+            if (datauser.username === userdata.username && datauser.status.playnamber === 0){
+                usernumber = datauser.status.playnamber;
+            }
             if(datauser.playnamber === usernumber)
                 renderMessage({author:'',message:`Você está conectado como ${datauser.username}, convide três amigos`});
-            videoconect(0);
+            videoinit(showuserdiv.length - 1);
         }else{
             renderMessage({author:'',message:'Já existe um guaxa online com este nome, tente outro.'});
             modal.classList.remove('hiddemdiv');
@@ -146,10 +170,16 @@ socket.on('adduser', (datauser)=>{
             renderMessage({author:'',message:'Já existe um jogador com este nome jogando com este guaxa tente outro nome de usúario.'});
             modal.classList.remove('hiddemdiv');
         }else{
+            if (datauser.username === userdata.username && datauser.status.playnamber){
+                usernumber = datauser.status.playnamber;
+            }
             datauser.playnamber = datauser.status.playnamber;
             renderMessage({author:'',message:`Bem vindo ao jogo ${datauser.username}`});
-            videoconect(datauser.playnamber);
             showdatauser(datauser);
+            users[datauser.sid]=datauser.playnamber;
+            videoinit(showuserdiv.length - 1);
+            //videoinit(datauser.status.playnamber);
+            //videoconect(datauser.playnamber);
         }
     }
 });
@@ -157,7 +187,7 @@ socket.on('adduser', (datauser)=>{
 socket.on('removeuser', (numberuser)=>{
     showuserdiv[numberuser].remove();
 });
-
+/*
 socket.on('radduser', (datauser)=>{
     if (datauser.typeuser === "Guaxa"){
         if (datauser.status){
@@ -170,7 +200,7 @@ socket.on('radduser', (datauser)=>{
         showdatauser(datauser);
     }
 });
-
+*/
 socket.on('roolresult',(result)=>{
     let str = [];
     for(let i=0; i<result.nums.length; i++){
@@ -190,11 +220,6 @@ function showdatauser(datauser){
             <video></video>
         </div>`
     mainusers.innerHTML += newuser;
-    /*
-    showusername[datauser.playnamber].innerHTML = datauser.username || "";
-    atrr[datauser.playnamber].innerHTML = datauser.caracteratrib || "";
-    caract[datauser.playnamber].innerHTML = datauser.caractername || "";
-    */
 }
 
 chat.addEventListener('submit',(ev)=>{
@@ -223,10 +248,97 @@ for (let i=0; i<mediabt.length; i++){
 //daqui pra baixo diz respeito ao streamer
 
 
-const myPeer = new Peer(undefined, {
+const peer = new Peer(undefined, {
   host: '/',
-  port: PORT
+  port: PORT,
+  path: '/peerjs',
+  debug: 3
 });
+let myVideoStream = [,,,];
+const myVideo = document.getElementsByTagName('video');
+let stream;
+function videoinit(vidnumber){
+navigator.mediaDevices.getUserMedia({
+    audio: true,
+    video: true,
+}).then((strea) => {
+    console.log(vidnumber)
+    if (vidnumber === usernumber){
+        stream = strea;
+        myVideoStream[vidnumber] = stream;
+        addVideoStream(myVideo[vidnumber], myVideoStream[vidnumber]);//adciona video proprio local na tela
+    }else{
+        console.log(vidnumber);
+
+/*
+
+
+
+enviar ligação p2p
+
+
+
+*/
+
+    }
+    /*
+    peer.on("call", (call) => {//prepara para receber ligação
+      console.log('someone call me');
+      stream.usernumber = usernumber;
+      console.log(stream);
+      call.answer(stream);//responde enviando a transmissão
+      //const video = document.createElement("video");//criar novo elemento de video
+      call.on("stream", (userVideoStream) => {//prepara para receber video
+        console.log(userVideoStream);
+        addVideoStream(myVideo[userVideoStream.usernumber], userVideoStream);//ao receber video insere no elemento criado
+      });
+    });
+
+    socket.on("user-connected", (userId) => {//recebe aviso de novo usuario
+      console.log('someone call me');
+      connectToNewUser(userId, stream);//conecta ao novo usuario
+    });
+    */
+  });
+}
+//adciona video
+const addVideoStream = (video, stream) => {
+    video.srcObject = stream;//sinal de video associado ao elemento
+    video.addEventListener("loadedmetadata", () => {//evento de carregar meta dados
+      video.play();//inicia reprodução
+    });
+};
+
+peer.on("call", (call) => {//prepara para receber ligação
+    console.log('someone call me');
+    stream.usernumber = usernumber;
+    console.log(stream);
+    call.answer(stream);//responde enviando a transmissão
+    //const video = document.createElement("video");//criar novo elemento de video
+    call.on("stream", (userVideoStream) => {//prepara para receber video
+      console.log(userVideoStream);
+      addVideoStream(myVideo[userVideoStream.usernumber], userVideoStream);//ao receber video insere no elemento criado
+    });
+  });
+
+socket.on("user-connected", (userId) => {//recebe aviso de novo usuario
+    console.log('someone call me');
+    connectToNewUser(userId, stream);//conecta ao novo usuario
+  });
+
+function connectToNewUser(userId, stream) {
+    const call = myPeer.call(userId, stream);
+    call.on('stream', userVideoStream => {
+      addVideoStream(myVideo[stream.usernumber], userVideoStream)
+    });
+    call.on('close', () => {
+      myVideo[users[userId]].remove();
+    });
+  
+    peers[userId] = call
+  }
+
+/*
 const myVideo = document.getElementsByTagName('video')
 for(let i=0; i<myVideo.length; i++){
     myVideo[i].muted = true
@@ -292,3 +404,4 @@ function addVideoStream(video, stream) {
     video.play();
   });
 }
+*/

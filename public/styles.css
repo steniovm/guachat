@@ -147,8 +147,9 @@ main{
 }
 
 video {
-  height: 135px;
+  max-height: 25vh;
 }
+
 .mediabt{
   width: 3em;
   height: 3em;
@@ -158,5 +159,5 @@ video {
   width: 2em;
 }
 .borderoff{
-  border: red solid 1px;
+  border: red solid 2px;
 }

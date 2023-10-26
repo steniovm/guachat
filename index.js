@@ -1,9 +1,13 @@
+const fs = require('fs');
 const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const app = express();
-const server = require('http').createServer(app);
+const privateKey  = fs.readFileSync('../server.key', 'utf8');
+const certificate = fs.readFileSync('../server.crt', 'utf8');
+const credentials = {key: privateKey, cert: certificate};
+const server = require('https').createServer(credentials, app);
 const io = require('socket.io')(server);
 dotenv.config();
 const port = process.env.PORT || 80;
@@ -122,6 +126,7 @@ io.on('connection', function(socket){
     socket.on('sendUser', async (data) =>{
         //messages.push(data);
         data.sid = socket.id;
+        console.log(data);
         //socket.broadcast.emit('receivedUser', data);
         if (data.typeuser === "Guaxa"){
             data.status = newGuaxa(data);
@@ -136,13 +141,14 @@ io.on('connection', function(socket){
                 await socket.join(room);
             }
         }
+        console.log(room);
         if (room){
             guaxas.forEach(async (el)=>{
                 if (el.username===room){
                     await io.to(room).emit('adduser', el);
                     el.gamers.forEach(async (ele)=>{
                         await io.to(room).emit('adduser', ele);
-                    });     
+                    });
                 }
             });
         }
@@ -162,7 +168,7 @@ io.on('connection', function(socket){
         result.user = data.user;
         io.to(data.room).emit('roolresult', result);
     });
-
+/*
     socket.on('join-room', (roomId, userId) => {
         console.log(roomId);
         socket.join(roomId)
@@ -172,7 +178,7 @@ io.on('connection', function(socket){
           socket.to(roomId).broadcast.emit('user-disconnected', userId)
         });
       });
-
+*/
 
     socket.on('disconnect', () => {
         let index = -1;
@@ -221,7 +227,8 @@ io.on('connection', function(socket){
 
 require('dns').lookup(require('os').hostname(), function (err, add, fam) {
     server.listen(port, () =>{
-        console.log(`para conversar acesse: http://${add}:${port}`);
+        console.log(`para conversar acesse: https://${add}:${port}`);
+        console.log(`ou: https://localhost:${port}`);
         //console.log(err);
         //console.log(fam);
     });
