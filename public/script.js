@@ -34,7 +34,16 @@ const mediaopt = { video: true, audio: true };
 let userdata = {};//dados do usuario
 let users = {};//lista de usuarios
 let usernumber = 0;//numero do usuario
-let userpeer = new Peer();//id de comunicação p2p
+let peer = new Peer(undefined, {
+  host: "/",
+  port: PORT,
+  path: "/peerjs",
+  debug: 3,
+});//id de comunicação p2p
+peer.on('open', function (id) {
+  userdata.peerid = id;
+  console.log('My peer ID is:', id);
+});
 let localstream;//streamer de video
 let streamer;//stramer de videos
 let socket = io();//conexão de socket
@@ -109,8 +118,6 @@ modalform.addEventListener("submit", (ev) => {
   } else if (data.get("typeuser") === "Jogador") {//se for tipo jogador apenas usernumber é associado
     usernumber = 1;
   }
-  //id para conexão p2p
-  userdata.peerid = userpeer;
   //renderiza mensagem de saudação
   renderMessage({ author: "", message: "Bem Vindo ao Guaxinins e Gambiarras" });
   //envia dados de usuário
@@ -187,7 +194,8 @@ continuar daqui
 usar o datauser.peerid
 
       */
-      showdatauser(datauser);
+      showdatauser(datauser);//inclui usuario na tela
+      //lista o usuario
       users[datauser.sid] = datauser.playnamber;
       if (
         datauser.username === userdata.username &&
@@ -195,20 +203,26 @@ usar o datauser.peerid
       ) {
         usernumber = datauser.status.playnamber;
       }
+      //renderiza mensagem de saudação para o caso de ususario ser o guaxa
       if (datauser.playnamber === usernumber)
         renderMessage({
           author: "",
           message: `Você está conectado como ${datauser.username}, convide três amigos`,
         });
-      videoinit(showuserdiv.length - 1);
+      //videoinit(showuserdiv.length - 1);
     } else {
+      //caso já exista um guaxa com o nome
+      //renderiza mensagem de falha
       renderMessage({
         author: "",
         message: "Já existe um guaxa online com este nome, tente outro.",
       });
+      //reexibe formulário
       modal.classList.remove("hiddemdiv");
     }
   } else {
+    //caso o usuario seja jogador
+    //em caso de falha, exibe mensagem e reecibe formulário
     if (!datauser.status.guaxa) {
       renderMessage({
         author: "",
@@ -231,43 +245,33 @@ usar o datauser.peerid
       });
       modal.classList.remove("hiddemdiv");
     } else {
+      //caso usuário seja valido
       if (
         datauser.username === userdata.username &&
         datauser.status.playnamber
       ) {
+        //atualiza variaveis globais do usuario
         usernumber = datauser.status.playnamber;
       }
       datauser.playnamber = datauser.status.playnamber;
+      //exibe saudação
       renderMessage({
         author: "",
         message: `Bem vindo ao jogo ${datauser.username}`,
       });
-      showdatauser(datauser);
-      users[datauser.sid] = datauser.playnamber;
-      videoinit(showuserdiv.length - 1);
+      showdatauser(datauser);//exibe tela do usuário
+      users[datauser.sid] = datauser.playnamber;//atualiza id do usuario
+      //videoinit(showuserdiv.length - 1);
       //videoinit(datauser.status.playnamber);
       //videoconect(datauser.playnamber);
     }
   }
 });
-
+//escuta remoção de usuários
 socket.on("removeuser", (numberuser) => {
   showuserdiv[numberuser].remove();
 });
-/*
-socket.on('radduser', (datauser)=>{
-    if (datauser.typeuser === "Guaxa"){
-        if (datauser.status){
-            datauser.playnamber = 0;
-            datauser.caracteratrib = 0;
-            datauser.caractername = "Guaxa";
-        }
-    }else{
-        datauser.playnamber = datauser.status.playnamber;
-        showdatauser(datauser);
-    }
-});
-*/
+//escuta resultado de rolagem de dados
 socket.on("roolresult", (result) => {
   let str = [];
   for (let i = 0; i < result.nums.length; i++) {
@@ -277,7 +281,7 @@ socket.on("roolresult", (result) => {
     str.push("Acertos: " + result.acertos);
   renderMessage({ author: result.user, message: `Rolagem: ${str.join(", ")}` });
 });
-
+//renderiza tela de usuário
 function showdatauser(datauser) {
   const newuser = `<div class="showuserdiv ${
     datauser.typeuser === "Guaxa" ? "divguaxa" : ""
@@ -293,7 +297,7 @@ function showdatauser(datauser) {
         </div>`;
   mainusers.innerHTML += newuser;
 }
-
+//submissão de mensagens do chat
 chat.addEventListener("submit", (ev) => {
   ev.preventDefault();
   author = username.value;
@@ -310,20 +314,8 @@ chat.addEventListener("submit", (ev) => {
   message.value = "";
 });
 
-for (let i = 0; i < mediabt.length; i++) {
-  mediabt[i].addEventListener("click", () => {
-    mediabt[i].classList.toggle("borderoff");
-  });
-}
-
 //daqui pra baixo diz respeito ao streamer
-
-const peer = new Peer(undefined, {
-  host: "/",
-  port: PORT,
-  path: "/peerjs",
-  debug: 3,
-});
+/*
 let myVideoStream = [, , ,];
 const myVideo = document.getElementsByTagName("video");
 let stream;
@@ -343,15 +335,14 @@ function videoinit(vidnumber) {
         console.log(vidnumber);
 
         /*
-
-
+*/
+/*
 
 enviar ligação p2p
 
 
 
-*/
-      }
+      }*/
       /*
     peer.on("call", (call) => {//prepara para receber ligação
       console.log('someone call me');
@@ -369,9 +360,10 @@ enviar ligação p2p
       console.log('someone call me');
       connectToNewUser(userId, stream);//conecta ao novo usuario
     });
-    */
+
     });
-}
+}*/
+/*
 //adciona video
 const addVideoStream = (video, stream) => {
   video.srcObject = stream; //sinal de video associado ao elemento
@@ -412,7 +404,7 @@ function connectToNewUser(userId, stream) {
 
   peers[userId] = call;
 }
-
+*/
 /*
 const myVideo = document.getElementsByTagName('video')
 for(let i=0; i<myVideo.length; i++){
