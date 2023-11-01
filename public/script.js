@@ -33,16 +33,18 @@ const mediaopt = { video: true, audio: true };
 //variaveis globais
 let userdata = {};//dados do usuario
 let users = {};//lista de usuarios
+let usersconn = {}//lista de conexões p2p
 let usernumber = 0;//numero do usuario
-let peer = new Peer(undefined, {
+let peer = new Peer();
+/*let peer = new Peer(undefined, {
   host: "/",
   port: PORT,
   path: "/peerjs",
   debug: 3,
-});//id de comunicação p2p
+});*/ //id de comunicação p2p
 peer.on('open', function (id) {
   userdata.peerid = id;
-  console.log('My peer ID is:', id);
+  //console.log('My peer ID is:', id);
 });
 let localstream;//streamer de video
 let streamer;//stramer de videos
@@ -108,6 +110,7 @@ mediabt[1].addEventListener("click", () => {
 //completa e envia o fomulario para o servidor
 modalform.addEventListener("submit", (ev) => {
   ev.preventDefault();//evita carregamento da pagina
+  const peerid = userdata.peerid;
   let data = new FormData(modalform);//dados do formulario
   userdata = Object.fromEntries(data);//pega dados dos campos imput
   modal.classList.add("hiddemdiv");//apaga o modal do form da pagina
@@ -120,9 +123,10 @@ modalform.addEventListener("submit", (ev) => {
   }
   //renderiza mensagem de saudação
   renderMessage({ author: "", message: "Bem Vindo ao Guaxinins e Gambiarras" });
+  userdata.peerid = peerid;
   //envia dados de usuário
   socket.emit("sendUser", userdata);
-  console.log(userdata);
+  //console.log(userdata);
 });
 
 //botões de rolagem de dados
@@ -188,21 +192,15 @@ socket.on("adduser", (datauser) => {
       datauser.caractername = "Guaxa";
       datauser.guaxaname = datauser.username;
       //renderiza dados
-      /*
-
-continuar daqui
-usar o datauser.peerid
-
-      */
       showdatauser(datauser);//inclui usuario na tela
       //lista o usuario
       users[datauser.sid] = datauser.playnamber;
-      if (
-        datauser.username === userdata.username &&
-        datauser.status.playnamber === 0
-      ) {
+      //conecta ao usuario por p2p
+      if (datauser.username === userdata.username) {
+        userdata.sid = datauser.sid;
         usernumber = datauser.status.playnamber;
       }
+      conecttouser(datauser);
       //renderiza mensagem de saudação para o caso de ususario ser o guaxa
       if (datauser.playnamber === usernumber)
         renderMessage({
@@ -251,6 +249,7 @@ usar o datauser.peerid
         datauser.status.playnamber
       ) {
         //atualiza variaveis globais do usuario
+        userdata.sid = datauser.sid;
         usernumber = datauser.status.playnamber;
       }
       datauser.playnamber = datauser.status.playnamber;
@@ -261,6 +260,8 @@ usar o datauser.peerid
       });
       showdatauser(datauser);//exibe tela do usuário
       users[datauser.sid] = datauser.playnamber;//atualiza id do usuario
+      //conecta ao usuario por p2p
+      conecttouser(datauser);
       //videoinit(showuserdiv.length - 1);
       //videoinit(datauser.status.playnamber);
       //videoconect(datauser.playnamber);
@@ -313,6 +314,56 @@ chat.addEventListener("submit", (ev) => {
   }
   message.value = "";
 });
+
+//conecta ao usuario p2p
+function conecttouser(datauser){
+  console.log('conecttouser:',datauser.peerid);
+  console.log('users',users);
+  console.log('userdata',userdata);
+  console.log((users[datauser.sid]))
+  if((users[datauser.sid] || users[datauser.sid] === 0) && (datauser.sid !== userdata.sid)){
+    if (!usersconn[datauser.peerid]){//conectar somente se não conectou ainda
+      usersconn[datauser.peerid] = peer.connect(datauser.peerid);
+      console.log('adcionado:',datauser.peerid);
+      /*
+        enviar streamer
+      */
+    }
+    console.log('conectar ao outro usuário')
+    peer.on('connection', function (conn) {
+      console.log('connection:', conn)
+      conn.on('open', function () {
+        // Receive messages
+        conn.on('data', function (data) {
+          console.log('Received', data);
+        });
+
+        // Send messages
+        conn.send('Hello!');
+      });
+    });
+  }
+}
+peer.on('connection', function (conn) {
+  console.log('connection:', conn)
+  if (!usersconn[conn.peer]){//adcionar somente se não conectou ainda
+    usersconn[conn.peer] = conn;
+    console.log('adcionado:',conn.peer);
+    /*
+      enviar streamer
+    */
+  }
+  conn.on('open', function () {
+    // Receive messages
+    conn.on('data', function (data) {
+      console.log('Received', data);
+    });
+    // Send messages
+    conn.send('Hello!');
+  });
+});
+
+
 
 //daqui pra baixo diz respeito ao streamer
 /*
