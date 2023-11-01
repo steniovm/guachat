@@ -1,4 +1,3 @@
-//elementos html
 const chat = document.getElementById("chat");
 const submitbt = document.getElementById("submitbt");
 const username = document.getElementById("username");
@@ -25,37 +24,27 @@ const mainusers = document.getElementById("mainusers");
 const showuserdiv = document.getElementsByClassName("showuserdiv");
 const instruct = document.getElementById("instruct");
 const framehelp = document.getElementById("framehelp");
-//encontra porta de comunicação
 const PORT =
   location.protocol === "https:" ? 443 : location.port ? location.port : 3000;
-//configura audio e video
 const mediaopt = { video: true, audio: true };
-//variaveis globais
-let userdata = {};//dados do usuario
-let users = {};//lista de usuarios
-let usernumber = 0;//numero do usuario
-let userpeer = new Peer();//id de comunicação p2p
-let localstream;//streamer de video
-let streamer;//stramer de videos
-let socket = io();//conexão de socket
-let author = "";//autor das menssagens
-let mess = "";//mensagens
 
-//atribui um valor aleatório para sugerir para o atributo do personagem
+let userdata = {};
+let users = {};
+let usernumber = 0;
+let localstream;
+let streamer;
+
 caracteratrib.value = Math.ceil(Math.random() * 4) + 1;
 attrlabel.innerHTML = caracteratrib.value;
 
-//mostra/esconde tutorial de uso
 instruct.addEventListener("click", function () {
   framehelp.classList.toggle("displaynone");
 });
 
-//atualiza label que mostra o valor do atributo
 caracteratrib.addEventListener("change", () => {
   attrlabel.innerHTML = caracteratrib.value;
 });
 
-//mostra/esconde o campos do personagem de acordo com o tipo de usuario (jogador/guaxa)
 typeguaxa.addEventListener("click", () => {
   caracterinfos.classList.add("hiddemdiv");
   guaxaname.required = false;
@@ -81,6 +70,8 @@ mediabt[0].addEventListener("click", () => {
     myVideoStream[usernumber].getAudioTracks()[0].enabled = true; //liga audio
     mediabt[0].classList.add("borderoff"); //altera botão
   }
+  //if (mediabt[0].classList.contains('borderoff'))stopmedias();
+  //else starmedia();
 });
 //evento de liga/desliga video
 mediabt[1].addEventListener("click", () => {
@@ -94,31 +85,28 @@ mediabt[1].addEventListener("click", () => {
     myVideoStream[usernumber].getVideoTracks()[0].enabled = true; //liga audio
     mediabt[1].classList.add("borderoff"); //altera botão
   }
+  //if (mediabt[1].classList.contains('borderoff'))stopmedias();
+  //else starmedia();
 });
 
-//completa e envia o fomulario para o servidor
 modalform.addEventListener("submit", (ev) => {
-  ev.preventDefault();//evita carregamento da pagina
-  let data = new FormData(modalform);//dados do formulario
-  userdata = Object.fromEntries(data);//pega dados dos campos imput
-  modal.classList.add("hiddemdiv");//apaga o modal do form da pagina
-  username.value = data.get("username");//preenche o campo input type=hidden
-  if (data.get("typeuser") === "Guaxa") {//se for selecionada a opção "guaxa" os campos de personagens serão preenchidos automaticamente
+  ev.preventDefault();
+  let data = new FormData(modalform);
+  userdata = Object.fromEntries(data);
+  modal.classList.add("hiddemdiv");
+  username.value = data.get("username");
+  if (data.get("typeuser") === "Guaxa") {
     usernumber = 0;
     userdata.guaxaname = userdata.username;
-  } else if (data.get("typeuser") === "Jogador") {//se for tipo jogador apenas usernumber é associado
+  } else if (data.get("typeuser") === "Jogador") {
     usernumber = 1;
   }
-  //id para conexão p2p
-  userdata.peerid = userpeer;
-  //renderiza mensagem de saudação
   renderMessage({ author: "", message: "Bem Vindo ao Guaxinins e Gambiarras" });
-  //envia dados de usuário
   socket.emit("sendUser", userdata);
   console.log(userdata);
+  //starmedia();
 });
 
-//botões de rolagem de dados
 for (let i = 0; i < dicebt.length; i++) {
   let rolldices = {};
   rolldices.nroll = (i % 3) + 1;
@@ -133,11 +121,15 @@ for (let i = 0; i < dicebt.length; i++) {
     rolldices.user = userdata.username;
     rolldices.room = userdata.guaxaname || userdata.username;
     rolldices.attr = userdata.caracteratrib;
-    socket.emit("rollDice", rolldices);//envia solicitação
+    socket.emit("rollDice", rolldices);
     console.log(rolldices);
   });
 }
-//renderiza mensagem no campo de chat
+
+let socket = io();
+let author = "";
+let mess = "";
+
 function renderMessage(messag) {
   messages.innerHTML += `<div class="message"><strong>${messag.author}: </strong>${messag.message}</div>`;
   messages.scrollTo({
@@ -148,45 +140,37 @@ function renderMessage(messag) {
     behavior: "smooth",
   });
 }
-//recebe mensagens previas (desativado)
-/*
+
 socket.on("previousMessages", (arr) => {
   arr.forEach((el) => {
     renderMessage(el);
   });
 });
-*/
-//recebe mensagens para o chat
+
 socket.on("receivedMessage", (messag) => {
   renderMessage(messag);
 });
-//recebe dados de novo usuário
+/*
+socket.on('receivedUser', (messag)=>{
+    console.log(messag);
+});
+*/
+
 socket.on("adduser", (datauser) => {
-  //varre usuarios na tela
   for (let i = 0; i < showuserdiv.length; i++) {
-    //se o novo usuario for encontrado na tela ele é removido da tela
     if (
       datauser.username ===
-      showuserdiv[i].querySelector(".showusername").textContent
+      showuserdiv[i].querySelector(".showusername").innerHTML
     ) {
       showuserdiv[i].remove();
     }
   }
-  //se o novo usuario for um Guaxa cria uma div destaque
   if (datauser.typeuser === "Guaxa") {
     if (datauser.status) {
-      //completa dados de usuario com valores padrão
       datauser.playnamber = 0;
       datauser.caracteratrib = 0;
       datauser.caractername = "Guaxa";
       datauser.guaxaname = datauser.username;
-      //renderiza dados
-      /*
-
-continuar daqui
-usar o datauser.peerid
-
-      */
       showdatauser(datauser);
       users[datauser.sid] = datauser.playnamber;
       if (

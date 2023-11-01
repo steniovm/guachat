@@ -1,42 +1,41 @@
-//carrega bibliotecas
 const fs = require('fs');
 const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const app = express();
-//cria autenticação https
 const privateKey  = fs.readFileSync('../server.key', 'utf8');
 const certificate = fs.readFileSync('../server.crt', 'utf8');
 const credentials = {key: privateKey, cert: certificate};
-//cria servidor
 const server = require('https').createServer(credentials, app);
 const io = require('socket.io')(server);
-//abre variaveis de ambiente
 dotenv.config();
 const port = process.env.PORT || 80;
 
-//configura servidor
+//let messages = [];
+let guaxas = [];
 app.use(cors());
 app.use(express.static(path.join('public')));
 app.set('views',path.join('public'));
 app.engine('html',require('ejs').renderFile);
 app.set('view engine', 'html');
+/*
+app.use('/',(req,res)=>{
+    res.sendFile(join('index.html'));
+});
 
-//variaveis globais da aplicação
-let guaxas = [];
 
-//end-point da pagina estática
-app.get('/', (req, res) => {
-    console.log('acesso em:',path.join(__dirname, 'public'),'por get');
+https://stackoverflow.com/questions/72133185/deploy-an-express-server-that-uses-express-static-to-serve-a-build-folder-to-ver
+
+
+*/
+//app.use('/',express.static('./public'));
+app.get('/*', (req, res) => {
     res.sendFile('index.html', {root: path.join(__dirname, 'public')});
 });
-//end-point da pagina estática
-app.post('/', (req, res) => {
-    console.log('acesso em:',path.join(__dirname, 'public'),'por post');
+app.post('/*', (req, res) => {
     res.sendFile('index.html', {root: path.join(__dirname, 'public')});
 });
-//cria novo usuario tipo guaxa
 function newGuaxa(user){
     let result = true;
     guaxas.forEach(el=>{
@@ -50,7 +49,6 @@ function newGuaxa(user){
     }
     return result;
 }
-//cria novo usuario tipo jogador
 function newGamer(user){
     let result = {guaxa:false, user:true, vaga:true, playnamber:0};
     guaxas.forEach(el=>{
@@ -64,7 +62,7 @@ function newGamer(user){
                     }
                 });
             }
-
+            
             if (result.user && result.vaga){
                 el.gamers.push(user);
                 result.playnamber = el.gamers.length;
@@ -74,7 +72,7 @@ function newGamer(user){
     });
     return result;
 }
-//executa rolagem de dados
+
 function rolldices(atrr, nroll){
 	let result = {nums:[], words:[]};
 	let res = 0;
@@ -92,7 +90,7 @@ function rolldices(atrr, nroll){
 	}
 	return result;
 }
-//executa teste físico
+
 function testef(atrr, nroll){
 	let result = rolldices(atrr, nroll);
 	result.acertos = 0;
@@ -105,7 +103,7 @@ function testef(atrr, nroll){
 	});
 	return result;
 }
-//executa teste intelectual
+
 function testei(atrr, nroll){
 	let result = rolldices(atrr, nroll);
 	result.acertos = 0;
@@ -118,11 +116,12 @@ function testei(atrr, nroll){
 	});
 	return result;
 }
-//escuta conecção websocket
 io.on('connection', function(socket){
     let room = '';
 
-    console.log('usuario conectado com id:',socket.id);
+    console.log('usuario conectado com id:'+socket.id);
+
+    //socket.emit('previousMessages', messages);
 
     socket.on('sendUser', async (data) =>{
         //messages.push(data);
@@ -142,7 +141,7 @@ io.on('connection', function(socket){
                 await socket.join(room);
             }
         }
-        console.log('acessou a sala:',room);
+        console.log(room);
         if (room){
             guaxas.forEach(async (el)=>{
                 if (el.username===room){
@@ -169,10 +168,22 @@ io.on('connection', function(socket){
         result.user = data.user;
         io.to(data.room).emit('roolresult', result);
     });
+/*
+    socket.on('join-room', (roomId, userId) => {
+        console.log(roomId);
+        socket.join(roomId)
+        socket.to(roomId).broadcast.emit('user-connected', userId)
+    
+        socket.on('disconnect', () => {
+          socket.to(roomId).broadcast.emit('user-disconnected', userId)
+        });
+      });
+*/
 
     socket.on('disconnect', () => {
         let index = -1;
         let room = '';
+        let usernumber = 0;
         guaxas.forEach((el,ind)=>{
             if (el.sid === socket.id){
                 index = ind;
@@ -195,13 +206,25 @@ io.on('connection', function(socket){
             guaxas.splice(index,1);
             if (room) io.to(room).emit('removeuser', 0);
         }
-
-        console.log('usuario desconectado id:',socket.id);
+        /*if (room){
+            guaxas.forEach(async (el)=>{
+                if (el.username===room){
+                    await io.to(room).emit('radduser', el);
+                    el.gamers.forEach(async (ele)=>{
+                        await io.to(room).emit('radduser', ele);
+                    });
+                    for(let i=el.gamers.length; i<3;i++){
+                        let datauser = {typeuser: 'Jogador', status:{guaxa:true, vaga:true, user:true, playnamber:i+1}};
+                        await io.to(room).emit('radduser', datauser);
+                    }
+                }
+            });
+        }*/
+        console.log('usuario desconectado id:'+socket.id);
       });
 
   });
 
-//escuta o servidor https
 require('dns').lookup(require('os').hostname(), function (err, add, fam) {
     server.listen(port, () =>{
         console.log(`para conversar acesse: https://${add}:${port}`);
