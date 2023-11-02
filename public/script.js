@@ -44,7 +44,7 @@ let peer = new Peer();
 });*/ //id de comunicação p2p
 peer.on('open', function (id) {
   userdata.peerid = id;
-  //console.log('My peer ID is:', id);
+  console.log('My peer ID is:', id);
 });
 let localstream;//streamer de video
 let streamer;//stramer de videos
@@ -82,28 +82,28 @@ typeplayer.addEventListener("click", () => {
 
 //evento de liga/desliga audio
 mediabt[0].addEventListener("click", () => {
-  const enabled = myVideoStream[usernumber].getAudioTracks()[0].enabled; //propriedade de audio ligado/desligado
+  const enabled = streams[userdata.sid].getAudioTracks()[0].enabled; //propriedade de audio ligado/desligado
   if (enabled) {
     //se audio ligado
-    myVideoStream[usernumber].getAudioTracks()[0].enabled = false; //desliga audio
-    mediabt[0].classList.remove("borderoff"); //altera botão
+    streams[userdata.sid].getAudioTracks()[0].enabled = false; //desliga audio
+    mediabt[0].classList.add("borderoff"); //altera botão
   } else {
     //se audio desligado
-    myVideoStream[usernumber].getAudioTracks()[0].enabled = true; //liga audio
-    mediabt[0].classList.add("borderoff"); //altera botão
+    streams[userdata.sid].getAudioTracks()[0].enabled = true; //liga audio
+    mediabt[0].classList.remove("borderoff"); //altera botão
   }
 });
 //evento de liga/desliga video
 mediabt[1].addEventListener("click", () => {
-  const enabled = myVideoStream[usernumber].getVideoTracks()[0].enabled; //propriedade de audio ligado/desligado
+  const enabled = streams[userdata.sid].getVideoTracks()[0].enabled; //propriedade de audio ligado/desligado
   if (enabled) {
     //se audio ligado
-    myVideoStream[usernumber].getVideoTracks()[0].enabled = false; //desliga audio
-    mediabt[1].classList.remove("borderoff"); //altera botão
+    streams[userdata.sid].getVideoTracks()[0].enabled = false; //desliga audio
+    mediabt[1].classList.add("borderoff"); //altera botão
   } else {
     //se audio desligado
-    myVideoStream[usernumber].getVideoTracks()[0].enabled = true; //liga audio
-    mediabt[1].classList.add("borderoff"); //altera botão
+    streams[userdata.sid].getVideoTracks()[0].enabled = true; //liga audio
+    mediabt[1].classList.remove("borderoff"); //altera botão
   }
 });
 
@@ -172,7 +172,7 @@ socket.on("receivedMessage", (messag) => {
   renderMessage(messag);
 });
 //recebe dados de novo usuário
-socket.on("adduser", (datauser) => {
+socket.on("adduser", async (datauser) => {
   //varre usuarios na tela
   for (let i = 0; i < showuserdiv.length; i++) {
     //se o novo usuario for encontrado na tela ele é removido da tela
@@ -197,17 +197,18 @@ socket.on("adduser", (datauser) => {
       users[datauser.sid] = datauser.playnamber;
       //conecta ao usuario por p2p
       if (datauser.username === userdata.username) {
-        userdata.sid = datauser.sid;
-        usernumber = datauser.status.playnamber;
+        if (datauser.sid) userdata.sid = datauser.sid;
+        if (datauser.status.playnamber !== undefined) usernumber = datauser.status.playnamber;
       }
-      conecttouser(datauser);
-      //renderiza mensagem de saudação para o caso de ususario ser o guaxa
+      await conecttouser(datauser);
+      //renderiza mensagem de saudação para o caso de usuário ser o guaxa
       if (datauser.playnamber === usernumber)
+      await videoinit(datauser);//inicia video do usuário
         renderMessage({
           author: "",
           message: `Você está conectado como ${datauser.username}, convide três amigos`,
         });
-      //videoinit(showuserdiv.length - 1);
+      //videoinit();
     } else {
       //caso já exista um guaxa com o nome
       //renderiza mensagem de falha
@@ -261,7 +262,8 @@ socket.on("adduser", (datauser) => {
       showdatauser(datauser);//exibe tela do usuário
       users[datauser.sid] = datauser.playnamber;//atualiza id do usuario
       //conecta ao usuario por p2p
-      conecttouser(datauser);
+      await conecttouser(datauser);
+      if (datauser.username === userdata.username) await videoinit(datauser);//inicia video do usuário
       //videoinit(showuserdiv.length - 1);
       //videoinit(datauser.status.playnamber);
       //videoconect(datauser.playnamber);
@@ -316,14 +318,10 @@ chat.addEventListener("submit", (ev) => {
 });
 
 //conecta ao usuario p2p
-function conecttouser(datauser){
-  console.log('conecttouser:',datauser.peerid);
-  console.log('users',users);
-  console.log('userdata',userdata);
-  console.log((users[datauser.sid]))
+async function conecttouser(datauser){
   if((users[datauser.sid] || users[datauser.sid] === 0) && (datauser.sid !== userdata.sid)){
     if (!usersconn[datauser.peerid]){//conectar somente se não conectou ainda
-      usersconn[datauser.peerid] = peer.connect(datauser.peerid);
+      usersconn[datauser.peerid] = await peer.connect(datauser.peerid);
       console.log('adcionado:',datauser.peerid);
       /*
         enviar streamer
@@ -366,6 +364,29 @@ peer.on('connection', function (conn) {
 
 
 //daqui pra baixo diz respeito ao streamer
+const videos = document.getElementsByTagName("video");
+let streams = {};
+
+function addVideoStream (video, stream) {
+  video.srcObject = stream; //sinal de video associado ao elemento
+  video.addEventListener("loadedmetadata", () => {
+    //evento de carregar meta dados
+    video.play(); //inicia reprodução
+  });
+};
+
+async function videoinit(user) {
+  console.log(user);
+  navigator.mediaDevices
+    .getUserMedia({
+      audio: true,
+      video: true,
+    })
+    .then((stream) => {
+      streams[user.sid] = stream;
+      addVideoStream(videos[users[user.sid]], streams[user.sid]);//adciona video local na tela
+    });
+}
 /*
 let myVideoStream = [, , ,];
 const myVideo = document.getElementsByTagName("video");
