@@ -48,9 +48,14 @@ peer.on('open', function (id) {
 });
 let localstream;//streamer de video
 let streamer;//stramer de videos
-let socket = io();//conexão de socket
 let author = "";//autor das menssagens
 let mess = "";//mensagens
+let socket;
+try {
+  socket = io();//conexão de socket
+} catch (error) {
+  console.log(error);
+}
 
 //atribui um valor aleatório para sugerir para o atributo do personagem
 caracteratrib.value = Math.ceil(Math.random() * 4) + 1;
@@ -82,28 +87,36 @@ typeplayer.addEventListener("click", () => {
 
 //evento de liga/desliga audio
 mediabt[0].addEventListener("click", () => {
-  const enabled = streams[userdata.peerid].getAudioTracks()[0].enabled; //propriedade de audio ligado/desligado
-  if (enabled) {
-    //se audio ligado
-    streams[userdata.peerid].getAudioTracks()[0].enabled = false; //desliga audio
-    mediabt[0].classList.add("borderoff"); //altera botão
-  } else {
-    //se audio desligado
-    streams[userdata.peerid].getAudioTracks()[0].enabled = true; //liga audio
-    mediabt[0].classList.remove("borderoff"); //altera botão
+  try {
+    const enabled = streams[userdata.peerid].getAudioTracks()[0].enabled; //propriedade de audio ligado/desligado
+    if (enabled) {
+      //se audio ligado
+      streams[userdata.peerid].getAudioTracks()[0].enabled = false; //desliga audio
+      mediabt[0].classList.add("borderoff"); //altera botão
+    } else {
+      //se audio desligado
+      streams[userdata.peerid].getAudioTracks()[0].enabled = true; //liga audio
+      mediabt[0].classList.remove("borderoff"); //altera botão
+    }
+  } catch (error) {
+    console.log(error);
   }
 });
 //evento de liga/desliga video
 mediabt[1].addEventListener("click", () => {
-  const enabled = streams[userdata.peerid].getVideoTracks()[0].enabled; //propriedade de audio ligado/desligado
-  if (enabled) {
-    //se audio ligado
-    streams[userdata.peerid].getVideoTracks()[0].enabled = false; //desliga audio
-    mediabt[1].classList.add("borderoff"); //altera botão
-  } else {
-    //se audio desligado
-    streams[userdata.peerid].getVideoTracks()[0].enabled = true; //liga audio
-    mediabt[1].classList.remove("borderoff"); //altera botão
+  try {
+    const enabled = streams[userdata.peerid].getVideoTracks()[0].enabled; //propriedade de audio ligado/desligado
+    if (enabled) {
+      //se audio ligado
+      streams[userdata.peerid].getVideoTracks()[0].enabled = false; //desliga audio
+      mediabt[1].classList.add("borderoff"); //altera botão
+    } else {
+      //se audio desligado
+      streams[userdata.peerid].getVideoTracks()[0].enabled = true; //liga audio
+      mediabt[1].classList.remove("borderoff"); //altera botão
+    }
+  } catch (error) {
+    console.log(error);
   }
 });
 
@@ -125,7 +138,11 @@ modalform.addEventListener("submit", (ev) => {
   renderMessage({ author: "", message: "Bem Vindo ao Guaxinins e Gambiarras" });
   userdata.peerid = peerid;
   //envia dados de usuário
-  socket.emit("sendUser", userdata);
+  try {
+    socket.emit("sendUser", userdata);
+  } catch (error) {
+    console.log(error);
+  }
   //console.log(userdata);
 });
 
@@ -168,133 +185,155 @@ socket.on("previousMessages", (arr) => {
 });
 */
 //recebe mensagens para o chat
-socket.on("receivedMessage", (messag) => {
-  renderMessage(messag);
-});
+try {
+  socket.on("receivedMessage", (messag) => {
+    renderMessage(messag);
+  });
+} catch (error) {
+  console.log(error);
+}
 //recebe dados de novo usuário
-socket.on("adduser", async (datauser) => {
-  //varre usuarios na tela
-  for (let i = 0; i < showuserdiv.length; i++) {
-    //se o novo usuario for encontrado na tela ele é removido da tela
-    if (
-      datauser.username ===
-      showuserdiv[i].querySelector(".showusername").textContent
-    ) {
-      showuserdiv[i].remove();
-    }
-  }
-  //se o novo usuario for um Guaxa cria uma div destaque
-  if (datauser.typeuser === "Guaxa") {
-    if (datauser.status) {
-      //completa dados de usuario com valores padrão
-      datauser.playnamber = 0;
-      datauser.caracteratrib = 0;
-      datauser.caractername = "Guaxa";
-      datauser.guaxaname = datauser.username;
-      //renderiza dados
-      showdatauser(datauser);//inclui usuario na tela
-      //lista o usuario
-      users[datauser.sid] = datauser.playnamber;
-      //atualiza dados globais do usuario
-      if (datauser.username === userdata.username) {
-        if (datauser.sid) userdata.sid = datauser.sid;
-        if (datauser.status.playnamber !== undefined) usernumber = datauser.status.playnamber;
+try {
+  socket.on("adduser", async (datauser) => {
+    //varre usuarios na tela
+    for (let i = 0; i < showuserdiv.length; i++) {
+      //se o novo usuario for encontrado na tela ele é removido da tela
+      if (
+        datauser.username ===
+        showuserdiv[i].querySelector(".showusername").textContent
+      ) {
+        showuserdiv[i].remove();
       }
-      //renderiza mensagem de saudação para o caso de usuário ser o guaxa
-      if (datauser.playnamber === usernumber)
-      await videoinit(datauser);//inicia video do usuário
+    }
+    //se o novo usuario for um Guaxa cria uma div destaque
+    if (datauser.typeuser === "Guaxa") {
+      if (datauser.status) {
+        //completa dados de usuario com valores padrão
+        datauser.playnamber = 0;
+        datauser.caracteratrib = 0;
+        datauser.caractername = "Guaxa";
+        datauser.guaxaname = datauser.username;
+        //renderiza dados
+        showdatauser(datauser);//inclui usuario na tela
+        //lista o usuario
+        users[datauser.sid] = datauser.playnamber;
+        //atualiza dados globais do usuario
+        if (datauser.username === userdata.username) {
+          if (datauser.sid) userdata.sid = datauser.sid;
+          if (datauser.status.playnamber !== undefined) usernumber = datauser.status.playnamber;
+        }
+        //renderiza mensagem de saudação para o caso de usuário ser o guaxa
+        if (datauser.playnamber === usernumber)
+        await videoinit(datauser);//inicia video do usuário
+          renderMessage({
+            author: "",
+            message: `Você está conectado como ${datauser.username}, convide três amigos`,
+          });
+      } else {
+        //caso já exista um guaxa com o nome
+        //renderiza mensagem de falha
         renderMessage({
           author: "",
-          message: `Você está conectado como ${datauser.username}, convide três amigos`,
+          message: "Já existe um guaxa online com este nome, tente outro.",
         });
-    } else {
-      //caso já exista um guaxa com o nome
-      //renderiza mensagem de falha
-      renderMessage({
-        author: "",
-        message: "Já existe um guaxa online com este nome, tente outro.",
-      });
-      //reexibe formulário
-      modal.classList.remove("hiddemdiv");
-    }
-  } else {
-    //caso o usuario seja jogador
-    //em caso de falha, exibe mensagem e reecibe formulário
-    if (!datauser.status.guaxa) {
-      renderMessage({
-        author: "",
-        message:
-          "Não existe um guaxa com este nome online, confirme com seu guaxa o nome de usuário dele.",
-      });
-      modal.classList.remove("hiddemdiv");
-    } else if (!datauser.status.vaga) {
-      renderMessage({
-        author: "",
-        message:
-          "As vagas para jogar com este guaxa já estão preenchidas, aguarde um jogador sair ou tente com outro guaxa.",
-      });
-      modal.classList.remove("hiddemdiv");
-    } else if (!datauser.status.user) {
-      renderMessage({
-        author: "",
-        message:
-          "Já existe um jogador com este nome jogando com este guaxa tente outro nome de usúario.",
-      });
-      modal.classList.remove("hiddemdiv");
-    } else {
-      //caso usuário seja valido
-      if (
-        datauser.username === userdata.username &&
-        datauser.status.playnamber
-      ) {
-        //atualiza variaveis globais do usuario
-        userdata.sid = datauser.sid;
-        usernumber = datauser.status.playnamber;
+        //reexibe formulário
+        modal.classList.remove("hiddemdiv");
       }
-      datauser.playnamber = datauser.status.playnamber;
-      //exibe saudação
-      renderMessage({
-        author: "",
-        message: `Bem vindo ao jogo ${datauser.username}`,
-      });
-      showdatauser(datauser);//exibe tela do usuário
-      users[datauser.sid] = datauser.playnamber;//atualiza id do usuario
-      if (datauser.username === userdata.username) {
-        await videoinit(datauser);//inicia video do usuário
+    } else {
+      //caso o usuario seja jogador
+      //em caso de falha, exibe mensagem e reecibe formulário
+      if (!datauser.status.guaxa) {
+        renderMessage({
+          author: "",
+          message:
+            "Não existe um guaxa com este nome online, confirme com seu guaxa o nome de usuário dele.",
+        });
+        modal.classList.remove("hiddemdiv");
+      } else if (!datauser.status.vaga) {
+        renderMessage({
+          author: "",
+          message:
+            "As vagas para jogar com este guaxa já estão preenchidas, aguarde um jogador sair ou tente com outro guaxa.",
+        });
+        modal.classList.remove("hiddemdiv");
+      } else if (!datauser.status.user) {
+        renderMessage({
+          author: "",
+          message:
+            "Já existe um jogador com este nome jogando com este guaxa tente outro nome de usúario.",
+        });
+        modal.classList.remove("hiddemdiv");
+      } else {
+        //caso usuário seja valido
+        if (
+          datauser.username === userdata.username &&
+          datauser.status.playnamber
+        ) {
+          //atualiza variaveis globais do usuario
+          userdata.sid = datauser.sid;
+          usernumber = datauser.status.playnamber;
+        }
+        datauser.playnamber = datauser.status.playnamber;
+        //exibe saudação
+        renderMessage({
+          author: "",
+          message: `Bem vindo ao jogo ${datauser.username}`,
+        });
+        showdatauser(datauser);//exibe tela do usuário
+        users[datauser.sid] = datauser.playnamber;//atualiza id do usuario
+        if (datauser.username === userdata.username) {
+          await videoinit(datauser);//inicia video do usuário
+        }
       }
-    }
-  }
-});
-//escuta remoção de usuários
-socket.on("removeuser", (numberuser) => {
-  showuserdiv[numberuser].remove();
-});
-//escuta resultado de rolagem de dados
-socket.on("roolresult", (result) => {
-  let str = [];
-  for (let i = 0; i < result.nums.length; i++) {
-    str.push(result.nums[i] + "-" + result.words[i]);
-  }
-  if (result.acertos || result.acertos == 0)
-    str.push("Acertos: " + result.acertos);
-  renderMessage({ author: result.user, message: `Rolagem: ${str.join(", ")}` });
-});
-
-socket.on("addvideos", async(allpeers) => {
-  console.log(allpeers);
-  console.log(peersids);
-  await allpeers.forEach(async(el,ind) => {
-    if (peersids[el.peerid] === undefined){
-      peersids[el.peerid] = ind;
-    }
-    if (ind > usernumber){//ligar só para quem tem numero de usuario maior
-      peersids[el.peerid]=el.usernumber;
-        console.log(el.peerid);
-        await calltouser(el.peerid, ind);
-        //faz adição de video pela resposta
     }
   });
-});
+} catch (error) {
+  console.log(error);
+}
+
+//escuta remoção de usuários
+try {
+  socket.on("removeuser", (numberuser) => {
+    showuserdiv[numberuser].remove();
+  });
+} catch (error) {
+  console.log(error);
+}
+//escuta resultado de rolagem de dados
+try {
+  socket.on("roolresult", (result) => {
+    let str = [];
+    for (let i = 0; i < result.nums.length; i++) {
+      str.push(result.nums[i] + "-" + result.words[i]);
+    }
+    if (result.acertos || result.acertos == 0)
+      str.push("Acertos: " + result.acertos);
+    renderMessage({ author: result.user, message: `Rolagem: ${str.join(", ")}` });
+  });
+} catch (error) {
+  console.log(error);
+}
+
+try {
+  socket.on("addvideos", async(allpeers) => {
+    console.log(allpeers);
+    console.log(peersids);
+    await allpeers.forEach(async(el,ind) => {
+      if (peersids[el.peerid] === undefined){
+        peersids[el.peerid] = ind;
+      }
+      if (ind > usernumber){//ligar só para quem tem numero de usuario maior
+        peersids[el.peerid]=el.usernumber;
+          console.log(el.peerid);
+          await calltouser(el.peerid, ind);
+          //faz adição de video pela resposta
+      }
+    });
+  });
+} catch (error) {
+  console.log(error);
+}
+
 //renderiza tela de usuário
 function showdatauser(datauser) {
   const newuser = `<div class="showuserdiv ${
@@ -350,7 +389,9 @@ async function videoinit(user) {
     .then((stream) => {
       streams[user.peerid] = stream;
       addVideoStream(videos[users[user.sid]], streams[user.peerid]);//adciona video local na tela
-    });
+    }).catch(error => {
+      console.log(error);
+    })
 }
 
 //realiza ligação enviando stream
@@ -358,8 +399,11 @@ async function calltouser(peerid, unumber){
   peersids[peerid] = unumber;
   const call = await peer.call(peerid,streams[userdata.peerid]);
   console.log(call);
+  console.log(call.peer);
   call.on('stream',remoteStream => {
     streams[call.peer] = remoteStream;
+    console.log(call.peer);//verificar
+    console.log(remoteStream);//verificar
     addVideoStream(videos[unumber], streams[call.peer]);
   });
 }
