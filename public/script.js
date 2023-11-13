@@ -257,16 +257,19 @@ function roolresult(result){
   renderMessage({ author: result.user, message: `Rolagem: ${str.join(", ")}` });
 }
 
-function addVideoStream (video, stream) {
+async function addVideoStream (video, stream) {
+  let result = false;
   try {
     video.srcObject = stream; //sinal de video associado ao elemento
-    video.addEventListener("loadedmetadata", () => {
+    await video.addEventListener("loadedmetadata", () => {
       //evento de carregar meta dados
       video.play(); //inicia reprodução
+      result = true;
     });
   } catch (error) {
-    console.log(error);
+    console.log(error);renderMessage({author:'error',message:error});
   }
+  return result;
 };
 
 async function videoinit(user) {
@@ -275,11 +278,11 @@ async function videoinit(user) {
       audio: true,
       video: true,
     })
-    .then((stream) => {
-      //users[user].videouser = stream;
+    .then(async (stream) => {
       streams[user] = stream;
-      addVideoStream(users[user].videoscreen, stream);//adciona video local na tela
-      users[user].videoconected = true;
+      const result = await addVideoStream(users[user].videoscreen, stream);//adciona video local na tela
+      if (result) users[user].videoconected = true;
+      intervalvideo();
     }).catch(error => {
       console.log(error);
     });
@@ -291,14 +294,14 @@ async function videoinit(user) {
   });
   if (ouser) calltouser(ouser);
 }
-let call;
+
 //realiza ligação enviando stream
 async function calltouser(user){
-  call = await peer.call(users[user].pid,streams[userdata.username]);
-  call.on('stream',remoteStream => {
+  const call = await peer.call(users[user].pid,streams[userdata.username]);
+  call.on('stream',async remoteStream => {
     if (!(users[user].videoconected)){
-      addVideoStream(users[user].videoscreen, remoteStream);
-      users[user].videoconected = true;
+      const result = await addVideoStream(users[user].videoscreen, remoteStream);
+      if (result) users[user].videoconected = true;
     }
   });
 }
@@ -307,16 +310,25 @@ async function calltouser(user){
 function reqcall(call){
   call.answer(streams[userdata.username]);
   call.on('stream', function(stream){
-    Object.keys(users).forEach(el=>{
+    Object.keys(users).forEach(async el=>{
       if(users[el].pid === call.peer){
         streams[el] = stream;
-        addVideoStream(users[el].videoscreen, streams[el]);
-        users[el].videoconected = true;
+        const result = await addVideoStream(users[el].videoscreen, streams[el]);
+        if (result) users[el].videoconected = true;
       }
     });
   });
 };
 
+function intervalvideo(){
+  let interval = setInterval(() => {
+    Object.keys(users).forEach(el => {
+      if (!(users[el].videoconected) && (el !== userdata.username)){
+        calltouser(users[el].username);
+      }
+    });
+  }, 60000);//a cada minuto verifica se há algum usuário sem conexão de video
+}
 //evento de liga/desliga audio
 mediabt[0].addEventListener("click", () => {
   try {
