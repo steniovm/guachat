@@ -174,3 +174,30 @@ iframe{
 .displaynone {
   display: none;
 }
+
+footer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+footer span{
+    font-weight: bold;
+    white-space: nowrap;
+}
+.myimg{
+  height: 6vh;
+  min-height:60px;
+}
+.divinfo{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+}
+.divinfo h2{
+  display: block;
+  align-self: center;
+}

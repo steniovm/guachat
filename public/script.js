@@ -328,6 +328,7 @@ function intervalvideo(){
       }
     });
   }, 60000);//a cada minuto verifica se há algum usuário sem conexão de video
+  console.log('verifica a cada minuto:',interval);
 }
 //evento de liga/desliga audio
 mediabt[0].addEventListener("click", () => {
