@@ -46,10 +46,11 @@ async function configConections(){
     //escutas de conexão
     peer.on('open', connectopen);//abre conexão com o servidor
     socket.on('adduser', createuser);//escuta usuario criado no servidor
-    socket.on("previousMessages", premessages);//recebe mensagens anteriores a entrada do usuário
+    socket.on('previousMessages', premessages);//recebe mensagens anteriores a entrada do usuário
     socket.on('removeuser', removeuser);// remove usuario que desconectou
     socket.on('roolresult', roolresult);//escuta rolagem de dados
     socket.on('receivedMessage', receivedMessage);//escuta menssagens do chat
+    socket.on('receivedpong', receivedpong);//escuta sinal para manter conexão ativa
     peer.on('call', reqcall);//escuta chamada p2p para videos
   } catch (error) {
     console.log(error);
@@ -60,7 +61,7 @@ async function configConections(){
 //gera id de conexão p2p
 function connectopen(id){
   userdata.pid = id;
-  console.log('My peer ID:', id);
+  //console.log('My peer ID:', id);
 }
 //recebe usuario criado no servidor
 function createuser(data){
@@ -98,6 +99,7 @@ function createuser(data){
   }
   if (data.username === userdata.username){
     videoinit(data.username);
+    pingpong();
   }
 }
 //recebe mensagens previas (desativado)
@@ -319,16 +321,17 @@ function reqcall(call){
     });
   });
 };
-
+//reconecta caso conexões p2p tenham caido
+let interval;
 function intervalvideo(){
-  let interval = setInterval(() => {
+  interval = setInterval(() => {
     Object.keys(users).forEach(el => {
       if (!(users[el].videoconected) && (el !== userdata.username)){
         calltouser(users[el].username);
       }
     });
   }, 60000);//a cada minuto verifica se há algum usuário sem conexão de video
-  console.log('verifica a cada minuto:',interval);
+  //console.log('verifica a cada minuto:',interval);
 }
 //evento de liga/desliga audio
 mediabt[0].addEventListener("click", () => {
@@ -364,4 +367,18 @@ mediabt[1].addEventListener("click", () => {
     console.log(error);
   }
 });
+let intervalpp;
+async function pingpong(){//solicitação vazia para o servidor, apenas para manter conexão ativa
+  intervalpp = setInterval(() => {
+    socket.emit("sendping", userdata.username);
+  }, 9999);
+}
+async function receivedpong(signal){
+  if (signal){
+    //console.log(signal, intervalpp);
+    return true;
+  }else{
+    return false;
+  }
 
+}

@@ -195,6 +195,10 @@ io.on('connection', function(socket){
     io.to(data.room).emit('roolresult', result);
   });
 
+  socket.on('sendping', data=>{
+    io.to(socket.id).emit('receivedpong', data);
+  })
+
   socket.on('disconnect', () => {
     if (room) io.to(room).emit('removeuser', username);
     let index = -1;
