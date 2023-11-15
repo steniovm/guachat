@@ -370,15 +370,17 @@ mediabt[1].addEventListener("click", () => {
 let intervalpp;
 async function pingpong(){//solicitação vazia para o servidor, apenas para manter conexão ativa
   intervalpp = setInterval(() => {
-    socket.emit("sendping", userdata.username);
-  }, 9999);
+    const time = (new Date()).getTime();
+    socket.emit("sendping", time);
+  }, 5000);
 }
-async function receivedpong(signal){
-  if (signal){
-    console.log(signal, intervalpp);
+async function receivedpong(pingtime){
+  if (pingtime){
+    const time = (new Date()).getTime();
+    console.log("ping",time-pingtime,"ms");
     return true;
   }else{
+    isconnect = configConections();
     return false;
   }
-
 }
