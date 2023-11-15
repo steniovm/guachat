@@ -375,7 +375,7 @@ async function pingpong(){//solicitação vazia para o servidor, apenas para man
 }
 async function receivedpong(signal){
   if (signal){
-    //console.log(signal, intervalpp);
+    console.log(signal, intervalpp);
     return true;
   }else{
     return false;
