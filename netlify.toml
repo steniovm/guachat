@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  publish = "public/"
+  publish = "/"
   command = "npm start"
 
 [build.environment]
