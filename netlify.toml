@@ -1,14 +1,23 @@
 [build]
   base = "/"
   publish = "/"
-  command = "npm start"
+  command = "node api.js"
 
 [build.environment]
   MESSLIMIT = "1000"
   PORT = "3000"
+  NETLIFE = "true"
 
 [functions]
   included_files = ["*","package.json"]
+  external_node_modules = ["express"]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  force = true
+  from = "/*"
+  status = 200
+  to = "/.netlify/functions/api/:splat"
 
 [dev]
   command = "npm start"
