@@ -5,7 +5,7 @@
 
 [build.environment]
   MESSLIMIT = "1000"
-  PORT = "443"
+  PORT = "3000"
 
 [functions]
   included_files = ["*","package.json"]
