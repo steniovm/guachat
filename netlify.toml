@@ -1,7 +1,7 @@
 [build]
   base = "/"
   publish = "/"
-  command = "node api.js"
+  command = "node api.js && node index.js"
 
 [build.environment]
   MESSLIMIT = "1000"
