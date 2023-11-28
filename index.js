@@ -132,7 +132,7 @@ io.on('connection', function(socket){
   let room = '';
   let username = '';
 
-  console.log('usuario conectado com id:',socket.id);
+  //console.log('usuario conectado com id:',socket.id);
 
   socket.on('sendUser', async (data) =>{
     //messages.push(data);
@@ -158,8 +158,8 @@ io.on('connection', function(socket){
       io.to(socket.id).emit('previousMessages',{username:data.username, hist:messages[data.guaxaname]});
     }
     data.room = room;
-    console.log(data);
-    console.log('acessou a sala:',room);
+    //console.log(data);
+    console.log(username,'acessou a sala:',room);
     if (room){
       const peersroom = [];
       guaxas.forEach(async (el)=>{
@@ -178,9 +178,11 @@ io.on('connection', function(socket){
   });
 
   socket.on('sendMessage', data =>{
-    messages[room].push(data);
-    if (messages[room].length > messlimit){
-      messages[room].shift();
+    if (messages[room] !== undefined){
+      messages[room].push(data);
+      if (messages[room].length > messlimit){
+        messages[room].shift();
+      }
     }
     io.to(room).emit('receivedMessage', data);
   });
@@ -191,7 +193,7 @@ io.on('connection', function(socket){
     else if (data.typetest === 'f') result=testef(data.attr,data.nroll);
     else if (data.typetest === 'i') result=testei(data.attr,data.nroll);
     result.user = data.user;
-    console.log(result);
+    //console.log(result);
     io.to(data.room).emit('roolresult', result);
   });
 
@@ -233,6 +235,7 @@ require('dns').lookup(require('os').hostname(), function (err, add, fam) {
       console.log(`ou: https://localhost:${port}`);
     }else{
       console.log(`para conversar acesse: http://${add}:${port}`);
+      console.log(`ou: https://${add}:${port}`);
     }
     //console.log(err);
     //console.log(fam);

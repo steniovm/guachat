@@ -368,16 +368,24 @@ mediabt[1].addEventListener("click", () => {
   }
 });
 let intervalpp;
+let todesconected = 3;
 async function pingpong(){//solicitação vazia para o servidor, apenas para manter conexão ativa
   intervalpp = setInterval(() => {
-    const time = (new Date()).getTime();
-    socket.emit("sendping", time);
+    if (todesconected === 0){
+      renderMessage({ author: "", message: "<strong>Você desconectou.</strong>" });
+      clearInterval(intervalpp);
+    }else{
+      const time = (new Date()).getTime();
+      socket.emit("sendping", time);
+      todesconected--;
+    }
   }, 5000);
 }
 async function receivedpong(pingtime){
   if (pingtime){
     const time = (new Date()).getTime();
     console.log("ping",time-pingtime,"ms");
+    todesconected = 3;
     return true;
   }else{
     isconnect = configConections();
