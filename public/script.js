@@ -75,7 +75,7 @@ function createuser(data){
       userdata.status = data.status;
       renderMessage({
         author: "",
-        message: `Bem vindo ao jogo Guaxa <strong>${data.username}</strong>, convide três jogadores para iniciar sua aventura.`,
+        message: `Bem vindo ao jogo Guaxa <strong>${data.username}</strong>, convide três jogadores para iniciar sua aventura pelo link <a href="${location.origin + '?guaxa=' +userdata.guaxaname}" target="_blank">${location.origin + '?guaxa=' +userdata.guaxaname}</a> .`,
       });
     }else if (data.status.guaxa && data.status.user && data.status.vaga){
       userdata.status = true;
@@ -126,6 +126,13 @@ typeplayer.addEventListener("click", () => {
   caractername.required = true;
   caracteratrib.required = true;
 });
+
+//faz leitura de query url se houver
+const queryURL = (new URLSearchParams(location.search)).get('guaxa');
+if (queryURL) {
+  typeplayer.click();
+  guaxaname.value = queryURL;
+}
 //mostra/esconde tutorial de uso
 instruct.addEventListener("click", function () {
   framehelp.classList.toggle("displaynone");
