@@ -201,3 +201,7 @@ footer span{
   display: block;
   align-self: center;
 }
+
+#disqus_thread {
+  width: 100%;
+}
