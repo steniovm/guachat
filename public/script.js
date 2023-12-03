@@ -15,6 +15,7 @@ const caractername = document.getElementById("caractername");
 const attrlabel = document.getElementById("attrlabel");
 const caracteratrib = document.getElementById("caracteratrib");
 const submituser = document.getElementById("submituser");
+const decriptcaracter = document.getElementById("decriptcaracter");
 const showusername = document.getElementsByClassName("showusername");
 const caracterinfo = document.getElementsByClassName("caracterinfo");
 const atrr = document.getElementsByClassName("atrr");
@@ -186,8 +187,10 @@ modalform.addEventListener("submit", (ev) => {
 function showdatauser(datauser) {
   const newuser = document.createElement('div');
   newuser.classList.add('showuserdiv');
-  if (datauser.typeuser === "Guaxa")
+  if (datauser.typeuser === "Guaxa"){
     newuser.classList.add('divguaxa');
+  }
+  newuser.title = datauser.decriptcaracter || "";
   newuser.innerHTML = `<span class="showusername">${datauser.username || ""}</span>
             <label class="caracterinfo ${
               datauser.typeuser === "Guaxa" ? "hiddemdiv" : ""
