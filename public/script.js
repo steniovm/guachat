@@ -69,16 +69,19 @@ function createuser(data){
   data.videoconected = false;//define que o streamer de video está desconectado
   //caso o usuário sejá o proprio jogador atualiza perfil
   if (data.username === userdata.username){
-    userdata.playnumber = data.playnumber;
-    userdata.sid = data.sid;
-    userdata.room = data.room;
     if (data.typeuser === "Guaxa") {
+      userdata.playnumber = data.playnumber;
+      userdata.sid = data.sid;
+      userdata.room = data.room;
       userdata.status = data.status;
       renderMessage({
         author: "",
         message: `Bem vindo ao jogo Guaxa <strong>${data.username}</strong>, convide três jogadores para iniciar sua aventura pelo link <a href="${location.origin + '?guaxa=' +userdata.guaxaname}" target="_blank">${location.origin + '?guaxa=' +userdata.guaxaname}</a> .`,
       });
     }else if (data.status.guaxa && data.status.user && data.status.vaga){
+      userdata.playnumber = data.playnumber;
+      userdata.sid = data.sid;
+      userdata.room = data.room;
       userdata.status = true;
       renderMessage({
         author: "",
@@ -86,6 +89,15 @@ function createuser(data){
       });
     }else{
       userdata.status = false;
+      if(!data.status.guaxa){
+        renderMessage({author:"",message:`O Guaxa <strong>${data.guaxaname}</strong> está offline, verifique o nome e a disponibilidade do seu guaxa e tente novamente.`});
+      }
+      if(!data.status.vaga){
+        renderMessage({author:"",message:`O Guaxa <strong>${data.guaxaname}</strong> está com a sala lotada, verifique a disponibilidade do seu guaxa e tente novamente.`});
+      }
+      if(!data.status.user){
+        renderMessage({author:"",message:`Na sala do Guaxa <strong>${data.guaxaname}</strong> já existe um usuário com nome <strong>${data.username}</strong> tente novamente com outro nome de usuário.`});
+      }
     }
   }else{
     renderMessage({
@@ -94,16 +106,18 @@ function createuser(data){
     });
   }
   //salva usuario na memória local
-  if (!users[data.username]){
-    users[data.username] = data;
-    showdatauser(data);
-  }
-  if (data.username === userdata.username){
-    videoinit(data.username);
-    pingpong();
+  if (userdata.status){
+    if (!users[data.username]){
+      users[data.username] = data;
+      showdatauser(data);
+    }
+    if (data.username === userdata.username){
+      videoinit(data.username);
+      pingpong();
+    }
   }
 }
-//recebe mensagens previas (desativado)
+//recebe mensagens previas
 function premessages(premess){
   if (premess.username === userdata.username)
   premess.hist.forEach((el) => {
