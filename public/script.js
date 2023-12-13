@@ -26,6 +26,7 @@ const mainusers = document.getElementById("mainusers");
 const showuserdiv = document.getElementsByClassName("showuserdiv");
 const instruct = document.getElementById("instruct");
 const framehelp = document.getElementById("framehelp");
+const savedcaracters = document.getElementById("savedcaracters");
 //encontra porta de comunicação
 const PORT =
   location.protocol === "https:" ? 443 : location.port ? location.port : 3000;
@@ -35,8 +36,9 @@ const mediaopt = { video: true, audio: true };
 let userdata = {};//dados do usuario
 let users = {};//lista de usuarios
 let streams = {};//lista de streams reproduziveis
-let socket;
-let peer;
+let chars = {};//personagens salvos no localStorage
+let socket;//conexão de socket
+let peer;//identificação peer to peer
 
 //configura conexões
 let isconnect = configConections();
@@ -63,6 +65,26 @@ async function configConections(){
 function connectopen(id){
   userdata.pid = id;
   //console.log('My peer ID:', id);
+}
+//lê personagens salvos no localStorage
+readSavedCaracters();
+function readSavedCaracters(){
+  chars = JSON.parse(localStorage.getItem('chars')) || {};
+  if (Object.keys(chars).length) {
+    savedcaracters.classList.remove('hiddemdiv');
+    Object.keys(chars).forEach(key => {
+      const btuser = document.createElement('div');
+      btuser.classList.add('savedchar');
+      btuser.innerHTML = key;
+      btuser.addEventListener('click', ()=>{
+        caractername.value = key;
+        caracteratrib.value = chars[key].atrib;
+        attrlabel.innerHTML = chars[key].atrib;
+        decriptcaracter.innerHTML = chars[key].decript;
+      });
+      savedcaracters.appendChild(btuser);
+    });
+  }
 }
 //recebe usuario criado no servidor
 function createuser(data){
@@ -115,6 +137,10 @@ function createuser(data){
       videoinit(data.username);
       pingpong();
     }
+  }else{
+    setTimeout(()=>{
+      modal.classList.remove("hiddemdiv");//mostra o modal do form da pagina
+    },3000);
   }
 }
 //recebe mensagens previas
@@ -191,6 +217,11 @@ modalform.addEventListener("submit", (ev) => {
     } catch (error) {
       console.log(error);
       modal.classList.remove("hiddemdiv");//retorna o modal do form para a pagina
+    }
+    //salva personagem no localStorage
+    if (data.get("caractername") !== ""){
+      chars[data.get("caractername")] = {'atrib': data.get("caracteratrib"), 'decript':data.get("decriptcaracter")};
+      localStorage.setItem('chars',JSON.stringify(chars));
     }
   }else{
     alert('falha de acesso, verifique sua conexão com internet e recarregue a página');

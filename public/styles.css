@@ -201,6 +201,12 @@ footer span{
   display: block;
   align-self: center;
 }
+.savedchar {
+  background-color: #bdbdbd;
+  border: solid 1px green;
+  border-radius: 0.5em;
+  text-align: center;
+}
 
 #disqus_thread {
   width: 100%;
