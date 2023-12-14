@@ -76,15 +76,34 @@ function readSavedCaracters(){
       const btuser = document.createElement('div');
       btuser.classList.add('savedchar');
       btuser.innerHTML = key;
+      btuser.title = "Carregar "+key;
+      const delbt = document.createElement('button');
+      delbt.classList.add('delbt');
+      delbt.innerHTML = "X";
+      btuser.title = "Remover "+key;
+      btuser.appendChild(delbt);
       btuser.addEventListener('click', ()=>{
         caractername.value = key;
         caracteratrib.value = chars[key].atrib;
         attrlabel.innerHTML = chars[key].atrib;
         decriptcaracter.innerHTML = chars[key].decript;
       });
+      delbt.addEventListener('click',()=>{
+        delete chars[key];
+        btuser.remove();
+        savelocalstorage();
+      });
       savedcaracters.appendChild(btuser);
     });
   }
+}
+//salva personagem no localStorage
+function savecaracter(data){
+  chars[data.get("caractername")] = {'atrib': data.get("caracteratrib"), 'decript':data.get("decriptcaracter")};
+  savelocalstorage();
+}
+function savelocalstorage(){
+  localStorage.setItem('chars',JSON.stringify(chars));
 }
 //recebe usuario criado no servidor
 function createuser(data){
@@ -149,7 +168,7 @@ function premessages(premess){
   premess.hist.forEach((el) => {
     renderMessage(el);
   });
-};
+}
 //formulario modal de login
 //configura valor inicial aleatório de atributo de personagem
 caracteratrib.value = Math.ceil(Math.random() * 4) + 1;
@@ -200,7 +219,7 @@ modalform.addEventListener("submit", (ev) => {
   ev.preventDefault();//evita carregamento da pagina
   if (isconnect){
     modal.classList.add("hiddemdiv");//apaga o modal do form da pagina
-    let data = new FormData(modalform);//dados do formulario
+    const data = new FormData(modalform);//dados do formulario
     const pid = userdata.pid;
     userdata = Object.fromEntries(data);//pega dados dos campos imput
     userdata.pid = pid;
@@ -220,8 +239,7 @@ modalform.addEventListener("submit", (ev) => {
     }
     //salva personagem no localStorage
     if (data.get("caractername") !== ""){
-      chars[data.get("caractername")] = {'atrib': data.get("caracteratrib"), 'decript':data.get("decriptcaracter")};
-      localStorage.setItem('chars',JSON.stringify(chars));
+      savecaracter(data);
     }
   }else{
     alert('falha de acesso, verifique sua conexão com internet e recarregue a página');

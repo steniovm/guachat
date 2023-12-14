@@ -202,10 +202,18 @@ footer span{
   align-self: center;
 }
 .savedchar {
-  background-color: #bdbdbd;
+  background-color: #9ea;
   border: solid 1px green;
   border-radius: 0.5em;
-  text-align: center;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  padding-left: 1em;
+}
+.delbt{
+  width: auto;
+  color: red;
+  text-shadow: 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
 }
 
 #disqus_thread {
